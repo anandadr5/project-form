@@ -1,0 +1,260 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Form Input PIC Pengawasan</title>
+    <style>
+      body {
+        font-family: Cambria;
+        background-color: #f4f4f4;
+        margin: 0;
+        padding: 0;
+      }
+
+      header {
+        background-color: #ce1e10;
+        color: white;
+        text-align: center;
+        padding: 20px;
+      }
+
+      .container {
+        max-width: 800px;
+        margin: 20px auto;
+        background-color: white;
+        padding: 30px;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        border-radius: 10px;
+      }
+
+      .form-container {
+        display: flex;
+        flex-direction: column;
+      }
+
+      .form-container label {
+        font-weight: bold;
+        margin-bottom: 5px;
+        margin-top: 15px;
+      }
+
+      .form-container input,
+      .form-container select,
+      .form-container button {
+        padding: 10px;
+        margin-bottom: 15px;
+        border: 1px solid #ddd;
+        border-radius: 5px;
+      }
+
+      .form-container select {
+        background-color: white;
+      }
+
+      .button-group {
+        display: flex;
+        gap: 10px;
+        margin-top: 10px;
+      }
+
+      .form-container button {
+        background-color: #ce1e10;
+        color: white;
+        padding: 12px 20px;
+        border: none;
+        border-radius: 5px;
+        cursor: pointer;
+        transition: background-color 0.3s;
+        flex: 1;
+      }
+
+      .form-container button:hover {
+        background-color: #ef190a;
+      }
+
+      .back-btn {
+        color: black;
+        text-decoration: none;
+        font-size: 1rem;
+        display: inline-block;
+        margin-top: 20px;
+        cursor: pointer;
+      }
+
+      .popup {
+        display: none;
+        position: fixed;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        background-color: #ffffff;
+        padding: 30px;
+        box-shadow: 0px 0px 15px rgba(0, 0, 0, 0.3);
+        border-radius: 10px;
+        color: #ef190a;
+        text-align: center;
+        z-index: 1000;
+      }
+
+      .popup p {
+        font-size: 24px;
+        font-weight: bold;
+        margin-bottom: 15px;
+      }
+
+      .popup.show {
+        display: block;
+      }
+
+      .popup button {
+        background-color: #ef190a;
+        color: white;
+        padding: 10px 20px;
+        border: none;
+        border-radius: 5px;
+        font-size: 16px;
+        cursor: pointer;
+      }
+
+      .popup button:hover {
+        background-color: #d50e08;
+      }
+    </style>
+  </head>
+  <body>
+    <header>
+      <h1>Form Input PIC Pengawasan</h1>
+    </header>
+
+    <div class="container">
+      <form id="pic-form" class="form-container">
+        <label for="cabang">Cabang:</label>
+        <input
+          type="text"
+          id="cabang"
+          name="cabang"
+          placeholder="Masukkan Cabang"
+          required
+        />
+
+        <label for="kode_toko">Kode Toko:</label>
+        <input
+          type="text"
+          id="kode_toko"
+          name="kode_toko"
+          placeholder="Masukkan Kode Toko"
+          required
+        />
+
+        <label for="kategori_lokasi">Kategori Lokasi:</label>
+        <select name="kategori_lokasi" id="kategori_lokasi" required>
+          <option value="">-- Pilih Kategori Lokasi --</option>
+          <option value="non_ruko_non_urugan_30hr">
+            Non Ruko Non Urugan 30 HR
+          </option>
+          <option value="non_ruko_non_urugan_35hr">
+            Non Ruko Non Urugan 35 HR
+          </option>
+          <option value="non_ruko_non_urugan_40hr">
+            Non Ruko Non Urugan 40 HR
+          </option>
+          <option value="non_ruko_non_urugan_48hr">
+            Non Ruko Non Urugan 48 HR
+          </option>
+          <option value="ruko_10hr">Ruko 10 HR</option>
+          <option value="ruko_14hr">Ruko 14 HR</option>
+          <option value="ruko_20hr">Ruko 20 HR</option>
+        </select>
+
+        <label for="tanggal_spk">Tanggal Mulai SPK:</label>
+        <input type="date" id="tanggal_spk" name="tanggal_spk" required />
+
+        <label for="upload_spk">Upload SPK:</label>
+        <input
+          type="file"
+          id="upload_spk"
+          name="upload_spk"
+          accept=".pdf"
+          required
+        />
+
+        <label for="upload_soft_file"
+          >Upload Soft File (RAB, Penawaran & Gambar Sipil & ME):</label
+        >
+        <input
+          type="file"
+          id="upload_soft_file"
+          name="upload_soft_file"
+          accept=".pdf"
+          required
+        />
+
+        <label for="pic_building_support">PIC Building Support:</label>
+        <select name="pic_building_support" id="pic_building_support" required>
+          <option value="">-- Pilih PIC Building Support --</option>
+          <option value="ari">Ari</option>
+          <option value="andri">Andri</option>
+          <option value="budi">Budi</option>
+        </select>
+
+        <div class="button-group">
+          <button type="submit">Simpan</button>
+        </div>
+      </form>
+
+      <a href="landing_page.html" class="back-btn"> ← Kembali ke Beranda </a>
+    </div>
+
+    <div class="popup" id="popup">
+      <p>Data Berhasil Terkirim</p>
+      <button onclick="closePopup()">Tutup</button>
+    </div>
+
+    <script>
+      const form = document.getElementById("pic-form");
+      const submitButton = form.querySelector("button[type='submit']");
+      const messageDiv = document.getElementById("popup");
+
+      form.addEventListener("submit", function (e) {
+        e.preventDefault();
+
+        messageDiv.textContent = "Mengirim data...";
+        messageDiv.style.display = "block";
+        messageDiv.style.backgroundColor = "beige";
+        messageDiv.style.color = "black";
+        submitButton.disabled = true;
+
+        try {
+          const formData = new FormData(this);
+          const formDataObj = {};
+
+          for (let [key, value] of formData.entries()) {
+            formDataObj[key] = value;
+          }
+
+          showPopup("Data berhasil disimpan!");
+          form.reset();
+        } catch (error) {
+          console.error("Error:", error);
+          showPopup("Error: " + error.message);
+        } finally {
+          submitButton.disabled = false;
+          setTimeout(() => {
+            messageDiv.textContent = "";
+            messageDiv.style.display = "none";
+          }, 4000);
+        }
+      });
+
+      function showPopup(message) {
+        messageDiv.querySelector("p").textContent = message;
+        messageDiv.classList.add("show");
+      }
+
+      function closePopup() {
+        messageDiv.classList.remove("show");
+      }
+    </script>
+  </body>
+</html>
