@@ -73,6 +73,11 @@
         background-color: #ef190a;
       }
 
+      .form-container button:disabled {
+        background-color: #cccccc;
+        cursor: not-allowed;
+      }
+
       .back-btn {
         color: black;
         text-decoration: none;
@@ -92,14 +97,15 @@
         padding: 30px;
         box-shadow: 0px 0px 15px rgba(0, 0, 0, 0.3);
         border-radius: 10px;
-        color: #ef190a;
+        color: #333;
         text-align: center;
         z-index: 1000;
       }
 
       .popup p {
-        font-size: 24px;
+        font-size: 20px;
         font-weight: bold;
+        margin-top: 0;
         margin-bottom: 15px;
       }
 
@@ -198,7 +204,7 @@
         </select>
 
         <div class="button-group">
-          <button type="submit">Simpan</button>
+          <button type="submit" id="submit-btn">Simpan</button>
         </div>
       </form>
 
@@ -206,7 +212,7 @@
     </div>
 
     <div class="popup" id="popup">
-      <p id="popup-message">Data Berhasil Terkirim</p>
+      <p id="popup-message"></p>
       <button onclick="closePopup()">Tutup</button>
     </div>
 
@@ -222,8 +228,11 @@
       form.addEventListener("submit", function (e) {
         e.preventDefault();
 
+        if (submitButton) {
+          submitButton.disabled = true;
+        }
+
         showPopup("Mengirim data, harap tunggu...");
-        submitButton.disabled = true;
 
         const formData = new FormData(form);
         const picSelect = document.getElementById("pic_building_support");
@@ -240,26 +249,34 @@
               showPopup("Data Berhasil Terkirim!");
               form.reset();
             } else {
-              console.error("Error:", data.error);
-              showPopup("Gagal mengirim data: " + data.error.message);
+              console.error("Server Error:", data.error);
+              showPopup("Gagal mengirim data: " + data.error);
             }
           })
           .catch((error) => {
-            console.error("Error:", error);
+            console.error("Fetch Error:", error);
             showPopup("Terjadi kesalahan: " + error.message);
           })
           .finally(() => {
-            submitButton.disabled = false;
+            if (submitButton) {
+              submitButton.disabled = false;
+            }
           });
       });
 
       function showPopup(message) {
-        popupMessage.textContent = message;
-        popup.classList.add("show");
+        if (popupMessage) {
+          popupMessage.textContent = message;
+        }
+        if (popup) {
+          popup.classList.add("show");
+        }
       }
 
       function closePopup() {
-        popup.classList.remove("show");
+        if (popup) {
+          popup.classList.remove("show");
+        }
       }
     </script>
   </body>
