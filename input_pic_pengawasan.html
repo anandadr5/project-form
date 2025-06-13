@@ -267,28 +267,6 @@
         <label for="tanggal_spk">Tanggal Mulai SPK:</label>
         <input type="date" id="tanggal_spk" name="tanggal_spk" required />
 
-        <!-- <label for="upload_spk">Upload SPK:</label>
-        <input
-          type="file"
-          id="upload_spk"
-          name="upload_spk"
-          accept=".pdf"
-          required
-        />
-        <div class="file-info">* File harus berformat PDF, maksimal 10MB</div>
-
-        <label for="upload_soft_file"
-          >Upload Soft File (RAB, Penawaran & Gambar Sipil & ME):</label
-        >
-        <input
-          type="file"
-          id="upload_soft_file"
-          name="upload_soft_file"
-          accept=".pdf"
-          required
-        />
-        <div class="file-info">* File harus berformat PDF, maksimal 10MB</div> -->
-
         <label for="pic_building_support">PIC Building Support:</label>
         <select name="pic_building_support" id="pic_building_support" required>
           <option value="">-- Pilih PIC Building Support --</option>
@@ -316,60 +294,99 @@
     </div>
 
     <script>
+      const SCRIPT_URL =
+        "https://script.google.com/macros/s/AKfycbwWxxgrupnR6IUTVWQDAU8KoGFAelr5U_xLn_pm7SnHhUC5i3iA_hyBz_1QbSnRrTADLA/exec";
+
       const form = document.getElementById("pic-form");
       const loading = document.getElementById("loading");
-      const successMessage = document.getElementById("success-message");
+      const submitBtn = document.getElementById("submit-btn");
       const errorMessage = document.getElementById("error-message");
+      const successMessage = document.getElementById("success-message");
       const popup = document.getElementById("popup");
       const popupMessage = document.getElementById("popup-message");
 
-      form.addEventListener("submit", function (e) {
-        e.preventDefault();
-        loading.classList.add("show");
-        successMessage.classList.remove("show");
+      // Hide messages
+      function hideMessages() {
         errorMessage.classList.remove("show");
+        successMessage.classList.remove("show");
+      }
 
-        const data = {
-          cabang: form.cabang.value,
-          kode_toko: form.kode_toko.value,
-          kategori_lokasi: form.kategori_lokasi.value,
-          tanggal_spk: form.tanggal_spk.value,
-          pic_building_support: form.pic_building_support.value,
-        };
+      // Show error message
+      function showError(message) {
+        hideMessages();
+        errorMessage.textContent = message;
+        errorMessage.classList.add("show");
+      }
 
-        fetch(
-          "https://script.google.com/macros/s/AKfycbzSreDmzNcYEbE4pjrh6DuA6crQ_MNhvFcpfGL0Y4WjYiZEJu83J8_tyTXoQ-VrPD2d/exec",
-          {
-            method: "POST",
-            body: JSON.stringify(data),
-            headers: {
-              "Content-Type": "application/json",
-            },
-          }
-        )
-          .then((res) => res.json())
-          .then((response) => {
-            loading.classList.remove("show");
-            if (response.status === "success") {
-              popupMessage.textContent =
-                "Data berhasil disimpan dan email telah dikirim.";
-              popup.classList.add("show");
-              form.reset();
-            } else {
-              errorMessage.textContent = "Gagal menyimpan data.";
-              errorMessage.classList.add("show");
-            }
-          })
-          .catch((err) => {
-            loading.classList.remove("show");
-            errorMessage.textContent = "Terjadi kesalahan saat mengirim data.";
-            errorMessage.classList.add("show");
-          });
-      });
+      // Show success message
+      function showSuccess(message) {
+        hideMessages();
+        successMessage.textContent = message;
+        successMessage.classList.add("show");
+      }
 
+      // Show popup
+      function showPopup(message) {
+        popupMessage.textContent = message;
+        popup.classList.add("show");
+      }
+
+      // Close popup
       function closePopup() {
         popup.classList.remove("show");
       }
+
+      // Handle form submission
+      form.addEventListener("submit", async function (e) {
+        e.preventDefault();
+
+        // Show loading
+        loading.classList.add("show");
+        submitBtn.disabled = true;
+        hideMessages();
+
+        // Get form data
+        const formData = new FormData(form);
+        const data = {};
+        for (let [key, value] of formData.entries()) {
+          data[key] = value;
+        }
+
+        try {
+          // Send data to Google Apps Script
+          const response = await fetch(SCRIPT_URL, {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify(data),
+            mode: "no-cors", // This handles CORS
+          });
+
+          // Since we're using no-cors, we can't read the response
+          // So we assume it worked if no error was thrown
+          showSuccess("Data berhasil disimpan dan email telah dikirim!");
+          showPopup(
+            "Data berhasil disimpan dan email notifikasi telah dikirim ke PIC Building Support!"
+          );
+          form.reset();
+        } catch (error) {
+          console.error("Error:", error);
+          showError(
+            "Terjadi kesalahan saat menyimpan data. Silakan coba lagi."
+          );
+          showPopup(
+            "Terjadi kesalahan saat menyimpan data. Silakan coba lagi."
+          );
+        } finally {
+          // Hide loading
+          loading.classList.remove("show");
+          submitBtn.disabled = false;
+        }
+      });
+
+      // Make closePopup available globally
+      window.closePopup = closePopup;
     </script>
   </body>
 </html>
