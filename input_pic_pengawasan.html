@@ -267,7 +267,7 @@
         <label for="tanggal_spk">Tanggal Mulai SPK:</label>
         <input type="date" id="tanggal_spk" name="tanggal_spk" required />
 
-        <label for="upload_spk">Upload SPK:</label>
+        <!-- <label for="upload_spk">Upload SPK:</label>
         <input
           type="file"
           id="upload_spk"
@@ -287,7 +287,7 @@
           accept=".pdf"
           required
         />
-        <div class="file-info">* File harus berformat PDF, maksimal 10MB</div>
+        <div class="file-info">* File harus berformat PDF, maksimal 10MB</div> -->
 
         <label for="pic_building_support">PIC Building Support:</label>
         <select name="pic_building_support" id="pic_building_support" required>
@@ -316,170 +316,60 @@
     </div>
 
     <script>
-      document
-        .getElementById("pic-form")
-        .addEventListener("submit", function (event) {
-          event.preventDefault();
+      const form = document.getElementById("pic-form");
+      const loading = document.getElementById("loading");
+      const successMessage = document.getElementById("success-message");
+      const errorMessage = document.getElementById("error-message");
+      const popup = document.getElementById("popup");
+      const popupMessage = document.getElementById("popup-message");
 
-          // Hide previous messages
-          hideMessages();
+      form.addEventListener("submit", function (e) {
+        e.preventDefault();
+        loading.classList.add("show");
+        successMessage.classList.remove("show");
+        errorMessage.classList.remove("show");
 
-          // Validate files before submitting
-          var spkFile = document.getElementById("upload_spk").files[0];
-          var softFile = document.getElementById("upload_soft_file").files[0];
+        const data = {
+          cabang: form.cabang.value,
+          kode_toko: form.kode_toko.value,
+          kategori_lokasi: form.kategori_lokasi.value,
+          tanggal_spk: form.tanggal_spk.value,
+          pic_building_support: form.pic_building_support.value,
+        };
 
-          if (!spkFile || !softFile) {
-            showError("Kedua file (SPK dan Soft File) wajib diupload");
-            return;
-          }
-
-          // Check file sizes (10MB = 10 * 1024 * 1024 bytes)
-          var maxSize = 10 * 1024 * 1024;
-          if (spkFile.size > maxSize) {
-            showError("File SPK terlalu besar (maksimal 10MB)");
-            return;
-          }
-          if (softFile.size > maxSize) {
-            showError("File Soft File terlalu besar (maksimal 10MB)");
-            return;
-          }
-
-          // Check file types
-          if (!spkFile.name.toLowerCase().endsWith(".pdf")) {
-            showError("File SPK harus berformat PDF");
-            return;
-          }
-          if (!softFile.name.toLowerCase().endsWith(".pdf")) {
-            showError("File Soft File harus berformat PDF");
-            return;
-          }
-
-          // Show loading state
-          showLoading();
-          disableForm();
-
-          var formData = new FormData(document.getElementById("pic-form"));
-          var url =
-            "https://script.google.com/macros/s/AKfycbzNWDI-vGTYY_rhQ-1uaJB9VQIyjudPbd-owP57XDNynlTVJTEeod-lOVQFfX3Zl-zj/exec";
-
-          fetch(url, {
+        fetch(
+          "https://script.google.com/macros/s/AKfycbzSreDmzNcYEbE4pjrh6DuA6crQ_MNhvFcpfGL0Y4WjYiZEJu83J8_tyTXoQ-VrPD2d/exec",
+          {
             method: "POST",
-            body: formData,
+            body: JSON.stringify(data),
+            headers: {
+              "Content-Type": "application/json",
+            },
+          }
+        )
+          .then((res) => res.json())
+          .then((response) => {
+            loading.classList.remove("show");
+            if (response.status === "success") {
+              popupMessage.textContent =
+                "Data berhasil disimpan dan email telah dikirim.";
+              popup.classList.add("show");
+              form.reset();
+            } else {
+              errorMessage.textContent = "Gagal menyimpan data.";
+              errorMessage.classList.add("show");
+            }
           })
-            .then((response) => {
-              if (!response.ok) {
-                throw new Error("Network response was not ok");
-              }
-              return response.text();
-            })
-            .then((result) => {
-              hideLoading();
-              enableForm();
-
-              try {
-                var data = JSON.parse(result);
-                if (data.status === "success") {
-                  showSuccess(data.message);
-                  resetForm();
-                  // Show popup for success
-                  document.getElementById("popup-message").textContent =
-                    data.message;
-                  document.getElementById("popup").classList.add("show");
-                } else {
-                  showError(
-                    data.message || "Terjadi kesalahan yang tidak diketahui"
-                  );
-                }
-              } catch (e) {
-                // If response is not JSON, assume success (for backward compatibility)
-                showSuccess("Data telah berhasil terkirim!");
-                resetForm();
-                document.getElementById("popup-message").textContent =
-                  "Data telah berhasil terkirim!";
-                document.getElementById("popup").classList.add("show");
-              }
-            })
-            .catch((error) => {
-              hideLoading();
-              enableForm();
-              showError("Terjadi kesalahan: " + error.message);
-            });
-        });
-
-      function showError(message) {
-        var errorDiv = document.getElementById("error-message");
-        errorDiv.textContent = message;
-        errorDiv.classList.add("show");
-        setTimeout(() => {
-          errorDiv.classList.remove("show");
-        }, 5000);
-      }
-
-      function showSuccess(message) {
-        var successDiv = document.getElementById("success-message");
-        successDiv.textContent = message;
-        successDiv.classList.add("show");
-        setTimeout(() => {
-          successDiv.classList.remove("show");
-        }, 5000);
-      }
-
-      function hideMessages() {
-        document.getElementById("error-message").classList.remove("show");
-        document.getElementById("success-message").classList.remove("show");
-      }
-
-      function showLoading() {
-        document.getElementById("loading").classList.add("show");
-      }
-
-      function hideLoading() {
-        document.getElementById("loading").classList.remove("show");
-      }
-
-      function disableForm() {
-        var submitBtn = document.getElementById("submit-btn");
-        submitBtn.disabled = true;
-        submitBtn.textContent = "Sedang memproses...";
-
-        // Disable all form inputs
-        var inputs = document.querySelectorAll(
-          "#pic-form input, #pic-form select"
-        );
-        inputs.forEach((input) => (input.disabled = true));
-      }
-
-      function enableForm() {
-        var submitBtn = document.getElementById("submit-btn");
-        submitBtn.disabled = false;
-        submitBtn.textContent = "Simpan";
-
-        // Enable all form inputs
-        var inputs = document.querySelectorAll(
-          "#pic-form input, #pic-form select"
-        );
-        inputs.forEach((input) => (input.disabled = false));
-      }
-
-      function resetForm() {
-        document.getElementById("pic-form").reset();
-      }
-
-      function closePopup() {
-        document.getElementById("popup").classList.remove("show");
-      }
-
-      // Close popup when clicking outside
-      document.getElementById("popup").addEventListener("click", function (e) {
-        if (e.target === this) {
-          closePopup();
-        }
+          .catch((err) => {
+            loading.classList.remove("show");
+            errorMessage.textContent = "Terjadi kesalahan saat mengirim data.";
+            errorMessage.classList.add("show");
+          });
       });
 
-      // Set minimum date to today
-      document
-        .getElementById("tanggal_spk")
-        .setAttribute("min", new Date().toISOString().split("T")[0]);
+      function closePopup() {
+        popup.classList.remove("show");
+      }
     </script>
   </body>
 </html>
