@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="id">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -126,6 +126,13 @@
       .popup button:hover {
         background-color: #d50e08;
       }
+
+      .file-info {
+        font-size: 12px;
+        color: #666;
+        margin-top: -10px;
+        margin-bottom: 15px;
+      }
     </style>
   </head>
   <body>
@@ -198,7 +205,7 @@
 
         <label for="pic_building_support">PIC Building Support:</label>
         <select name="pic_building_support" id="pic_building_support" required>
-          <option value="">-- Pilih PIC Building Support --</option>
+          <option>-- Pilih PIC Building Support --</option>
           <option value="andy.mulyono@sat.co.id">ANDY MULYONO</option>
           <option value="jhon.rianto@sat.co.id">JHON RIYANTO</option>
         </select>
@@ -217,66 +224,30 @@
     </div>
 
     <script>
-      const form = document.getElementById("pic-form");
-      const submitButton = document.getElementById("submit-btn");
-      const popup = document.getElementById("popup");
-      const popupMessage = document.getElementById("popup-message");
+      document
+        .getElementById("pic-form")
+        .addEventListener("submit", function (event) {
+          event.preventDefault();
 
-      const SCRIPT_URL =
-        "https://script.google.com/macros/s/AKfycby9gk4Ws9TbIkSU_3Zm4h5doUPT1b_mAmLJgzJErsrM6fRpLhkrVxRaVcKiKgg5Z4Tf/exec";
+          var formData = new FormData(document.getElementById("pic-form"));
+          var url =
+            "https://script.google.com/macros/s/AKfycbxxKj-hhnBBkpWajZhSnShs84Ioe54asgLdPJo3WSC-l6f1xcKTx0L80r6wKO550xWW/exec";
 
-      form.addEventListener("submit", function (e) {
-        e.preventDefault();
-
-        if (submitButton) {
-          submitButton.disabled = true;
-        }
-
-        showPopup("Mengirim data, harap tunggu...");
-
-        const formData = new FormData(form);
-        const picSelect = document.getElementById("pic_building_support");
-        const picName = picSelect.options[picSelect.selectedIndex].text;
-        formData.append("pic_name", picName);
-
-        fetch(SCRIPT_URL, {
-          method: "POST",
-          body: formData,
-        })
-          .then((response) => response.json())
-          .then((data) => {
-            if (data.result === "success") {
-              showPopup("Data Berhasil Terkirim!");
-              form.reset();
-            } else {
-              console.error("Server Error:", data.error);
-              showPopup("Gagal mengirim data: " + data.error);
-            }
+          fetch(url, {
+            method: "POST",
+            body: formData,
           })
-          .catch((error) => {
-            console.error("Fetch Error:", error);
-            showPopup("Terjadi kesalahan: " + error.message);
-          })
-          .finally(() => {
-            if (submitButton) {
-              submitButton.disabled = false;
-            }
-          });
-      });
-
-      function showPopup(message) {
-        if (popupMessage) {
-          popupMessage.textContent = message;
-        }
-        if (popup) {
-          popup.classList.add("show");
-        }
-      }
+            .then((response) => response.text())
+            .then((result) => {
+              document.getElementById("popup-message").textContent =
+                "Data telah berhasil terkirim!";
+              document.getElementById("popup").classList.add("show");
+            })
+            .catch((error) => alert("Terjadi kesalahan: " + error));
+        });
 
       function closePopup() {
-        if (popup) {
-          popup.classList.remove("show");
-        }
+        document.getElementById("popup").classList.remove("show");
       }
     </script>
   </body>
