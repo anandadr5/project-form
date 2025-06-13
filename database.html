@@ -1,0 +1,396 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Google Sheets Database Demo</title>
+    <style>
+      body {
+        font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 20px;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        min-height: 100vh;
+      }
+
+      .container {
+        background: white;
+        border-radius: 15px;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+        overflow: hidden;
+      }
+
+      .header {
+        background: linear-gradient(45deg, #4285f4, #34a853);
+        color: white;
+        padding: 30px;
+        text-align: center;
+      }
+
+      .header h1 {
+        margin: 0;
+        font-size: 2.5em;
+        font-weight: 300;
+      }
+
+      .header p {
+        margin: 10px 0 0 0;
+        opacity: 0.9;
+        font-size: 1.1em;
+      }
+
+      .content {
+        padding: 30px;
+      }
+
+      .section {
+        margin-bottom: 40px;
+        padding: 25px;
+        border-radius: 10px;
+        background: #f8f9fa;
+        border-left: 5px solid #4285f4;
+      }
+
+      .section h2 {
+        color: #333;
+        margin-top: 0;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+      }
+
+      .icon {
+        width: 24px;
+        height: 24px;
+        background: #4285f4;
+        border-radius: 50%;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        color: white;
+        font-weight: bold;
+      }
+
+      .form-group {
+        margin-bottom: 20px;
+      }
+
+      .form-group label {
+        display: block;
+        margin-bottom: 8px;
+        font-weight: 600;
+        color: #555;
+      }
+
+      .form-group input,
+      .form-group select {
+        width: 100%;
+        padding: 12px;
+        border: 2px solid #e1e5e9;
+        border-radius: 8px;
+        font-size: 14px;
+        transition: border-color 0.3s ease;
+      }
+
+      .form-group input:focus,
+      .form-group select:focus {
+        outline: none;
+        border-color: #4285f4;
+        box-shadow: 0 0 0 3px rgba(66, 133, 244, 0.1);
+      }
+
+      .btn {
+        background: linear-gradient(45deg, #4285f4, #34a853);
+        color: white;
+        border: none;
+        padding: 12px 24px;
+        border-radius: 8px;
+        cursor: pointer;
+        font-size: 16px;
+        font-weight: 600;
+        transition: all 0.3s ease;
+        margin-right: 10px;
+        margin-bottom: 10px;
+      }
+
+      .btn:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 5px 15px rgba(66, 133, 244, 0.3);
+      }
+
+      .btn-danger {
+        background: linear-gradient(45deg, #ea4335, #fbbc04);
+      }
+
+      .btn-info {
+        background: linear-gradient(45deg, #34a853, #0f9d58);
+      }
+
+      .data-table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-top: 20px;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        border-radius: 8px;
+        overflow: hidden;
+      }
+
+      .data-table th {
+        background: #4285f4;
+        color: white;
+        padding: 15px;
+        text-align: left;
+        font-weight: 600;
+      }
+
+      .data-table td {
+        padding: 15px;
+        border-bottom: 1px solid #eee;
+      }
+
+      .data-table tr:hover {
+        background: #f8f9fa;
+      }
+
+      .result-box {
+        background: #e8f5e8;
+        border: 1px solid #4caf50;
+        padding: 15px;
+        border-radius: 8px;
+        margin-top: 15px;
+        display: none;
+      }
+
+      .error-box {
+        background: #ffebee;
+        border: 1px solid #f44336;
+        padding: 15px;
+        border-radius: 8px;
+        margin-top: 15px;
+        display: none;
+      }
+
+      .grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 20px;
+      }
+
+      @media (max-width: 768px) {
+        .grid {
+          grid-template-columns: 1fr;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <div class="header">
+        <h1>📊 Google Sheets Database</h1>
+        <p>Simulasi Interface untuk Database berbasis Google Sheets</p>
+      </div>
+
+      <div class="content">
+        <div class="grid">
+          <div class="section">
+            <h2><span class="icon">+</span>Tambah Data Baru</h2>
+            <div class="form-group">
+              <label>Cabang</label>
+              <input
+                type="text"
+                id="cabang"
+                placeholder="Masukkan nama cabang"
+              />
+            </div>
+            <div class="form-group">
+              <label>Nama</label>
+              <input
+                type="text"
+                id="nama"
+                placeholder="Masukkan nama lengkap"
+              />
+            </div>
+            <div class="form-group">
+              <label>Jabatan</label>
+              <input type="text" id="jabatan" placeholder="Masukkan jabatan" />
+            </div>
+            <div class="form-group">
+              <label>Email</label>
+              <input type="email" id="email" placeholder="nama@email.com" />
+            </div>
+            <button class="btn" onclick="tambahData()">Tambah Data</button>
+            <div id="addResult" class="result-box"></div>
+          </div>
+
+          <div class="section">
+            <h2><span class="icon">🔍</span>Cari Data</h2>
+            <div class="form-group">
+              <label>Cari berdasarkan</label>
+              <select id="searchType">
+                <option value="cabang">Cabang</option>
+                <option value="nama">Nama</option>
+                <option value="jabatan">Jabatan</option>
+                <option value="email">Email</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label>Kata kunci</label>
+              <input
+                type="text"
+                id="searchValue"
+                placeholder="Masukkan kata kunci"
+              />
+            </div>
+            <button class="btn btn-info" onclick="cariData()">Cari Data</button>
+            <div id="searchResult" class="result-box"></div>
+          </div>
+        </div>
+
+        <div class="section">
+          <h2><span class="icon">📋</span>Data Terkini</h2>
+          <button class="btn btn-info" onclick="loadAllData()">
+            Refresh Data
+          </button>
+          <button class="btn btn-danger" onclick="clearTable()">
+            Clear Table
+          </button>
+
+          <table class="data-table" id="dataTable">
+            <thead>
+              <tr>
+                <th>No</th>
+                <th>Cabang</th>
+                <th>Nama</th>
+                <th>Jabatan</th>
+                <th>Email</th>
+                <th>Aksi</th>
+              </tr>
+            </thead>
+            <tbody id="dataBody">
+              <!-- Data akan ditampilkan di sini -->
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <script>
+      let dataCount = 0;
+      let sampleData = [];
+      let currentEditId = null;
+
+      function tambahData() {
+        const cabang = document.getElementById("cabang").value;
+        const nama = document.getElementById("nama").value;
+        const jabatan = document.getElementById("jabatan").value;
+        const email = document.getElementById("email").value;
+
+        if (!cabang || !nama || !jabatan || !email) {
+          showMessage("addResult", "Harap isi semua field!", "error");
+          return;
+        }
+
+        if (currentEditId === null) {
+          // Add new data
+          dataCount++;
+          const newData = { id: dataCount, cabang, nama, jabatan, email };
+          sampleData.push(newData);
+          addRowToTable(newData);
+          showMessage(
+            "addResult",
+            `Data ${nama} berhasil ditambahkan!`,
+            "success"
+          );
+        } else {
+          // Edit existing data
+          const updatedData = {
+            id: currentEditId,
+            cabang,
+            nama,
+            jabatan,
+            email,
+          };
+          const index = sampleData.findIndex(
+            (data) => data.id === currentEditId
+          );
+          if (index > -1) {
+            sampleData[index] = updatedData;
+            loadAllData();
+            showMessage(
+              "addResult",
+              `Data ${nama} berhasil diperbarui!`,
+              "success"
+            );
+          }
+        }
+
+        // Clear form and reset
+        document.getElementById("cabang").value = "";
+        document.getElementById("nama").value = "";
+        document.getElementById("jabatan").value = "";
+        document.getElementById("email").value = "";
+        currentEditId = null;
+      }
+
+      function addRowToTable(data) {
+        const tbody = document.getElementById("dataBody");
+        const row = document.createElement("tr");
+        row.innerHTML = `
+                <td>${data.id}</td>
+                <td>${data.cabang}</td>
+                <td>${data.nama}</td>
+                <td>${data.jabatan}</td>
+                <td>${data.email}</td>
+                <td>
+                    <button class="btn" onclick="editData(${data.id})">Edit</button>
+                    <button class="btn btn-danger" onclick="hapusData(${data.id})">Hapus</button>
+                </td>
+            `;
+        tbody.appendChild(row);
+      }
+
+      function editData(id) {
+        const data = sampleData.find((item) => item.id === id);
+        if (data) {
+          document.getElementById("cabang").value = data.cabang;
+          document.getElementById("nama").value = data.nama;
+          document.getElementById("jabatan").value = data.jabatan;
+          document.getElementById("email").value = data.email;
+          currentEditId = id;
+        }
+      }
+
+      function hapusData(id) {
+        if (confirm("Yakin ingin menghapus data ini?")) {
+          sampleData = sampleData.filter((item) => item.id !== id);
+          loadAllData();
+          showMessage("addResult", "Data berhasil dihapus!", "success");
+        }
+      }
+
+      function loadAllData() {
+        const tbody = document.getElementById("dataBody");
+        tbody.innerHTML = "";
+
+        sampleData.forEach((data) => {
+          addRowToTable(data);
+        });
+      }
+
+      function clearTable() {
+        document.getElementById("dataBody").innerHTML = "";
+        showMessage("addResult", "Tabel berhasil dikosongkan!", "success");
+      }
+
+      function showMessage(elementId, message, type) {
+        const element = document.getElementById(elementId);
+        element.innerHTML = message;
+        element.className = type === "success" ? "result-box" : "error-box";
+        element.style.display = "block";
+
+        setTimeout(() => {
+          element.style.display = "none";
+        }, 3000);
+      }
+    </script>
+  </body>
+</html>

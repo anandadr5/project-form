@@ -270,8 +270,6 @@
         <label for="pic_building_support">PIC Building Support:</label>
         <select name="pic_building_support" id="pic_building_support" required>
           <option value="">-- Pilih PIC Building Support --</option>
-          <option value="andy.mulyono@sat.co.id">ANDY MULYONO</option>
-          <option value="jhon.rianto@sat.co.id">JHON RIYANTO</option>
         </select>
 
         <div class="loading" id="loading">
@@ -295,7 +293,7 @@
 
     <script>
       const SCRIPT_URL =
-        "https://script.google.com/macros/s/AKfycbwWxxgrupnR6IUTVWQDAU8KoGFAelr5U_xLn_pm7SnHhUC5i3iA_hyBz_1QbSnRrTADLA/exec";
+        "https://script.google.com/macros/s/AKfycbwbZuGESUDXn2UN97xupuYn6hZfQvHswoHsK98wXpVJw2w8AU34W_nllxSW-j1U922k5A/exec";
 
       const form = document.getElementById("pic-form");
       const loading = document.getElementById("loading");
@@ -304,6 +302,45 @@
       const successMessage = document.getElementById("success-message");
       const popup = document.getElementById("popup");
       const popupMessage = document.getElementById("popup-message");
+      const cabangInput = document.getElementById("cabang");
+      const picSelect = document.getElementById("pic_building_support");
+
+      cabangInput.addEventListener("change", async function () {
+        const cabang = cabangInput.value.trim();
+        if (!cabang) return;
+
+        // Kosongkan dropdown dulu
+        picSelect.innerHTML =
+          '<option value="">-- Pilih PIC Building Support --</option>';
+
+        try {
+          const response = await fetch(
+            `${SCRIPT_URL}?cabang=${encodeURIComponent(cabang)}`
+          );
+          const result = await response.json();
+
+          if (result.status === "success") {
+            if (result.picList.length === 0) {
+              const opt = document.createElement("option");
+              opt.textContent = "PIC tidak ditemukan untuk cabang ini";
+              opt.disabled = true;
+              picSelect.appendChild(opt);
+            } else {
+              result.picList.forEach((pic) => {
+                const option = document.createElement("option");
+                option.value = pic.email;
+                option.textContent = pic.nama.toUpperCase();
+                picSelect.appendChild(option);
+              });
+            }
+          } else {
+            showError("Gagal mengambil data PIC.");
+          }
+        } catch (err) {
+          console.error("Fetch error:", err);
+          showError("Terjadi kesalahan saat mengambil data PIC.");
+        }
+      });
 
       // Hide messages
       function hideMessages() {
